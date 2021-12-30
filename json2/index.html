@@ -1,0 +1,749 @@
+<!DOCTYPE html>
+<html lang="zh-CN" class="os-mac screen-desktop-wide device-desktop">
+<head>
+<meta http-equiv="Content-Type" content="text/html; charset=UTF-8">
+<title>JSON在线解析及格式化验证 - JSON.cn</title>
+<meta name="HandheldFriendly" content="True">
+<meta name="MobileOptimized" content="720">
+<meta http-equiv="Cache-Control" content="max-age=3600">
+<meta http-equiv="X-UA-Compatible" content="IE=edge">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<meta name="robots" content="all">
+<meta name="author" content="json.cn">
+<link href="./files/zui.min.css" rel="stylesheet">
+<link href="./files/font-awesome.min.css" rel="stylesheet">
+<link href="./files/base.css" rel="stylesheet">
+<link href="./files/new-style.css" rel="stylesheet">
+<link href="./files/new-style2.css" rel="stylesheet">
+<link href="./files/header.css" rel="stylesheet">
+<style>
+.tip-mask {
+    position: fixed;
+    background-color: rgba(255, 255, 255, .5);
+    z-index: 9999;
+    top: 0;
+    left: 0;
+    right: 0;
+    bottom: 0;
+    display: none;
+}
+
+.old-version-tip {
+    z-index: 99999;
+    position: relative;
+}
+
+.old-version-tip:after {
+    position: absolute;
+    width: 113px;
+    height: 100px;
+    content: '';
+    right: -10px;
+    top: -10px;
+    background-size: contain;
+    background-repeat: no-repeat;
+}
+
+.old-version span {
+    position: relative;
+    z-index: 1;
+}
+
+.xf-window {
+    display: none;
+}
+
+
+.form-control.focus, .form-control:focus {
+    border-color: #145ccd;
+    outline: 0;
+    -webkit-box-shadow: inset 0 1px 1px rgba(0, 0, 0, .075), 0 0 8px rgba(102, 175, 233, .6);
+    box-shadow: inset 0 1px 1px rgba(0, 0, 0, .075), 0 0 8px rgba(102, 175, 233, .6);
+}
+
+@media (min-width: 1200px) {
+    .container {
+        max-width: 1200px;
+        padding: 0;
+    }
+}
+
+@media (max-width: 1200px) {
+    #right-box {
+        padding-top: 90px !important;
+    }
+}
+.editor-full-screen{
+    width: 100% !important;
+    height: 100% !important;
+    position: fixed!important;
+    top: 0;
+    left: 0;
+    z-index: 999;
+    background: #fff;
+}
+.overflow-hidden{
+    overflow: hidden;
+}
+#right-box{
+    border-top: 0!important;
+}
+.modal-overflow-unset{overflow:unset!important;}
+.json_key{ color: #92278f;font-weight:bold;}
+.json_null{color: #f1592a;font-weight:bold;}
+.json_string{ color: #3ab54a;font-weight:bold;}
+.json_number{ color: #25aae2;font-weight:bold;}
+.json_boolean{ color: #f98280;font-weight:bold;}
+.json_link{ color: #61D2D6;font-weight:bold;}
+.json_array_brackets{}
+
+.myNotice{
+    display: inline-block;
+}
+.hasNotice{
+    position: relative;
+}
+.myNotice.hasNotice:after{
+    content: '';
+    width: 8px;
+    height: 8px;
+    border-radius: 8px;
+    background-color: red;
+    position: absolute;
+    right: 0;
+    top: 0;
+}
+a.hasNotice:after{
+    left: 10px;
+    top: 50% !important;
+    margin-top: -4px;
+}
+</style>
+<script type="text/javascript" src="./files/lang.js"></script>
+<link rel="stylesheet" href="./files/layer(1).css" id="layuicss-layer">
+</head>
+<body class="bg-color-f7 modal-overflow-unset">
+<main class="row-fluid editor-con" style="font-family: menlo, &quot;monospace&quot;, Tahoma, 微软雅黑, 幼圆 !important; position: relative;">
+    <div class="col-md-5 col-xs-5" style="padding: 0px; height: 100%; position: relative; z-index: 10;">
+        <div class="numberedtextarea-wrapper "><textarea id="json-src" placeholder="请输入json数据... " class="form-control common-font-size" style="height:100%;padding:10px 10px 10px 30px;border:0;border-radius:0;resize: none;
+                  outline:none;border: 1px solid #eee"></textarea><div class="numberedtextarea-line-numbers" style="padding-top: 10px; line-height: 23.918px; font-family: menlo, monospace, Tahoma, 微软雅黑, 幼圆; width: 30px;"><div class="numberedtextarea-number numberedtextarea-number-1" style="margin-bottom: 10px;">1</div></div></div>
+    </div>
+    <div id="dragEle" style="position: absolute; cursor: move;"></div>
+    <div class="col-md-7 col-xs-7" style="padding: 0px; position: relative; height: 100%; display: flex; flex-direction: column;">
+        <div class="tool" style="border-top: 1px solid #eee;border-right: 1px solid #eee">
+            <a href="#" class="tip zip" title="" data-placement="bottom" data-original-title="压缩" style="color:#999;"><i class="fa fa-database"></i></a>
+            <a href="#" class="tip xml" title="" data-placement="bottom" data-original-title="转XML" style="color:#999;"><i class="fa fa-file-excel-o"></i></a>
+            <a href="#" class="tip shown" title="" data-placement="bottom" data-original-title="显示行号"><i class="fa fa-sort-amount-asc"></i></a>
+            <a href="#" class="tip clear" title="" data-placement="bottom" data-original-title="清空"><i class="fa fa-trash"></i></a>
+            <a href="#" class="tip save" title="" data-placement="bottom" data-original-title="保存"><i class="fa fa-download"></i></a>
+            <a href="#" class="tip copy" title="" data-clipboard-target="#json-target" data-placement="bottom" data-original-title="复制"><i class="fa fa-copy"></i></a>
+
+            <a href="#" class="tip compress" title="" data-placement="bottom" data-original-title="折叠"><i class="fa fa-compress"></i></a>
+            <label style="cursor: pointer">
+                <input type="checkbox" checked="checked" name="cancelZY" id="cancelZY" style="margin-top: 0;position: relative;top: 2px">
+                保留转义
+            </label>
+            <a href="https://www.json.cn/json/jsononline.html" class="old-version" style="display: none"><span>旧版</span></a>
+            <div class="tip-mask"></div>
+        </div>
+        <div style="position: absolute;top: 0;left: 0;background: #fff;height: 60px; width: 100%;z-index: 0;"></div>
+        <div id="right-box" class="common-font-size bg-color-ff" style="width:100%;border:solid 1px #eee;border-radius:0;resize: none;overflow-y:scroll; outline:none;position:relative;flex: 1;flex-grow: 1;">
+            <p class="editor-tip">可点击key和value值进行编辑</p>
+            <div id="hidden-message-box" class="alert alert-danger alert-dismissible" role="alert" style="display:none;margin-bottom:0;padding:10px 2vw;font-size: calc(var(--target) + 4px);">
+                <button type="button" class="close" data-dismiss="alert" aria-label="Close"><span aria-hidden="true">×</span>
+                </button>
+                <p><i class="fa fa-bell" aria-hidden="true"></i>
+                    提示：
+                    <span id="hidden-message">
+                      默认警告
+                  </span>
+
+                </p>
+            </div>
+            <div id="line-num" style="background-color:#fafafa;padding:0px 8px;float:left;border-right:dashed 1px #E5EBEE;display:none;color:#999;position:absolute;text-align:center;over-flow:hidden;"><div>1<div><div>2<div></div></div></div></div></div>
+            <div class="ro" id="json-target" style="padding:0px 32px;white-space: pre-line;word-wrap:break-word;"></div>
+        </div>
+    </div>
+    <br style="clear:both;">
+
+
+
+
+</main>
+<script data-ad-client="ca-pub-0888257628527075" async="" src="./files/f.txt"></script>
+<script src="./files/lang.js"></script>
+<style>
+    .popup-link-info-box {
+        position: absolute;
+        right: 58px;
+        top: 0;
+        background-color: #fff;
+        -webkit-box-shadow: 0px 1px 4px rgba(0, 0, 0, 0.1);
+        box-shadow: 0px 1px 4px rgba(0, 0, 0, 0.1);
+        padding: 15px;
+        display: none;
+    }
+
+    .popup-link-info-box li {
+        float: left;
+        margin-right: 10px;
+        border: 1px solid #eee;
+        text-align: center;
+        line-height: 50px;
+    }
+
+    .popup-link-info-box li p {
+        font-size: 14px;
+        color: #333;
+    }
+
+    .popup-link-info-box li p span {
+        font-size: 14px;
+        color: #333;
+    }
+
+    .popup-link-info-box li .popup-wechat-wrapper {}
+
+    .popup-link-info-box li .popup-wechat-wrapper img {
+        height: 100%;
+        width: 100%;
+        object-fit: cover;
+    }
+
+</style>
+
+<link href="./files/jquery.numberedtextarea.css" rel="stylesheet">
+
+<script src="./files/jquery.min.js"></script>
+<script src="./files/zui.min.js"></script>
+<script src="./files/jquery.message.js"></script>
+<div style="clear:both;"></div><div id="jquery-beauty-msg"></div>
+<script src="./files/bignumber.min.js"></script>
+<script src="./files/jquery.json.js"></script>
+<script src="./files/jquery.xml2json.js"></script>
+<script src="./files/jquery.json2xml.js"></script>
+<script src="./files/json2.js"></script>
+<script src="./files/jsonlint.js"></script>
+<script src="./files/clipboard.min.js"></script>
+<script src="./files/FileSaver.min.js"></script>
+<script src="./files/jquery.numberedtextarea.js"></script>
+<script src="./files/drag.js"></script>
+
+
+<script type="text/javascript">
+    if (window.localStorage.getItem('show-version-tip') && window.localStorage.getItem('show-version-tip') === '1') {
+    } else {
+        // $('.old-version').addClass('old-version-tip');
+        // $('.old-version').attr('data-href', $('.old-version').attr('href'));
+        // $('.old-version').attr('href', '');
+        // $('.tip-mask').show()
+    }
+    $('.tip-mask').click(function () {
+        $(this).remove();
+        $('.old-version-tip').removeClass('old-version-tip');
+        $('.old-version').attr('href', $('.old-version').attr('data-href'));
+    });
+    $('.old-version-tip').click(function () {
+        $(this).remove();
+        $('.old-version').attr('href', $('.old-version').attr('data-href'));
+        $('.tip-mask').removeClass('old-version-tip');
+        window.localStorage.setItem('show-version-tip', '1')
+    });
+
+    $('textarea').numberedtextarea();
+    var current_json = '';
+    var current_content = '';
+    var current_json_str = '';
+    var xml_flag = false;
+    var zip_flag = false;
+    var shown_flag = false;
+    var compress_flag = false;
+    $('.tip').tooltip();
+
+    function init() {
+        xml_flag = false;
+        zip_flag = false;
+        shown_flag = false;
+        compress_flag = false;
+        isXml = false;
+        renderLine();
+        $('.xml').attr('style', 'color:#999;');
+        $('.zip').attr('style', 'color:#999;');
+
+    }
+
+    $('#cancelZY').click(function () {
+        init();
+        var content = $.trim($('#json-src').val());
+        var result = '';
+        if (content != '') {
+            //如果是xml,那么转换为json
+            if (content.substr(0, 1) === '<' && content.substr(-1, 1) === '>') {
+                try {
+                    var json_obj = $.xml2json(content);
+                    content = JSON.stringify(json_obj);
+                } catch (e) {
+                    result = '解析错误：<span style="color: #f1592a;font-weight:bold;">' + e.message + '</span>';
+                    current_json_str = result;
+                    $('#json-target').html(result);
+                    return false;
+                }
+
+            }
+            try {
+                var hasZY = $('#cancelZY').prop('checked');
+                if (hasZY) {
+                    content = content.replace(/\\/g, '\\\\');
+                    content = content.replace(/\\"/g, '\\\\"');
+                }
+
+                current_json = jsonlint.parse(content);
+                current_json_str = JSON.stringify(current_json);
+                //current_json = JSON.parse(content);
+                current_content = content;
+                result = new JSONFormat(content, 4).toString();
+            } catch (e) {
+                result = '<span style="color: #f1592a;font-weight:bold;">' + e + '</span>';
+                current_json_str = result;
+            }
+
+            $('#json-target').html(result);
+        } else {
+            $('#json-target').html('');
+        }
+    });
+
+    var isXml = false;
+    $('#json-src').keyup(function () {
+        init();
+        var content = $.trim($(this).val());
+        var result = '';
+        if (content != '') {
+            //如果是xml,那么转换为json
+            if (content.substr(0, 1) === '<' && content.substr(-1, 1) === '>') {
+                isXml = true;
+                try {
+                    var json_obj = $.xml2json(content);
+                    content = JSON.stringify(json_obj);
+                } catch (e) {
+                    result = '解析错误：<span style="color: #f1592a;font-weight:bold;">' + e.message + '</span>';
+                    current_json_str = result;
+                    $('#json-target').html(result);
+                    return false;
+                }
+
+            }
+
+            try {
+                var hasZY = $('#cancelZY').prop('checked');
+                if (hasZY) {
+                    content = content.replace(/\\/g, '\\\\');
+                    content = content.replace(/\\"/g, '\\\\"');
+                }
+
+                current_json = jsonlint.parse(content);
+                current_json_str = JSON.stringify(current_json);
+
+                //current_json = JSON.parse(content);
+                current_content = content;
+                result = new JSONFormat(content, 4).toString();
+            } catch (e) {
+                result = '<span style="color: #f1592a;font-weight:bold;">' + e + '</span>';
+                current_json_str = result;
+            }
+
+            $('#json-target').html(result);
+        } else {
+            $('#json-target').html('');
+        }
+
+    });
+
+    //主入口
+    function getRealJsonData(baseStr) {
+        if (!baseStr || typeof baseStr != 'string') return;
+        var jsonData = null;
+        try {
+            jsonData = JSON.parse(baseStr);
+        } catch (err){
+            return null;
+        }
+        var needReplaceStrs = [];
+        loopFindArrOrObj(jsonData,needReplaceStrs);
+        needReplaceStrs.forEach(function (replaceInfo) {
+            var matchArr = baseStr.match(eval('/"'+ replaceInfo.key + '":[0-9]{15,}/'));
+            if (matchArr) {
+                var str = matchArr[0];
+                var replaceStr = str.replace('"' + replaceInfo.key + '":','"' + replaceInfo.key + '":"');
+                replaceStr += '"';
+                baseStr = baseStr.replace(str,replaceStr);
+            }
+        });
+        var returnJson = null;
+        returnJson = JSON.parse(baseStr);
+        return returnJson;
+    }
+    //遍历对象类型的
+    function getNeedRpStrByObj(obj,needReplaceStrs) {
+        for (var key in obj) {
+            var value = obj[key];
+            if (typeof value == 'number' && value > 9007199254740992){
+                needReplaceStrs.push({key:key});
+            }
+            loopFindArrOrObj(value,needReplaceStrs);
+        }
+    }
+    //遍历数组类型的
+    function getNeedRpStrByArr(arr,needReplaceStrs) {
+        for(var i=0; i<arr.length; i++){
+            var value = arr[i];
+            loopFindArrOrObj(value,needReplaceStrs);
+        }
+    }
+    //递归遍历
+    function loopFindArrOrObj(value,needRpStrArr) {
+        var valueTypeof = Object.prototype.toString.call(value);
+        if (valueTypeof == '[object Object]') {
+            needRpStrArr.concat(getNeedRpStrByObj(value,needRpStrArr));
+        }
+        if (valueTypeof == '[object Array]') {
+            needRpStrArr.concat(getNeedRpStrByArr(value,needRpStrArr));
+        }
+    }
+
+
+    $('#right-box').keyup(function () {
+
+        var text = $('#json-target').html().replace(/<br\/>/g, "\n").replace(/<br>/g, "\n").replace(/<[^>]+>/g, "").replace(/&nbsp;/ig, " ").replace(/Object{...}/ig, "").replace(/Array\[[0-9]+\]/ig, "");
+        if (!xml_flag) {
+            $('#json-src').val(text);
+            current_content = text;
+        }
+
+    });
+    $('.xml').click(function () {
+        if (xml_flag) {
+            $('#json-src').keyup();
+        } else {
+            var result = $.json2xml(current_content);
+            $('#json-target').html('<textarea style="width:100%;position:absolute;height: 80vh;min-height:480px;border:0;resize:none;">' + result + '</textarea>');
+            xml_flag = true;
+            $(this).attr('style', 'color:#15b374;');
+        }
+
+    });
+    $('.shown').click(function () {
+        if (!shown_flag) {
+            renderLine();
+            $('#line-num').show();
+            $('.numberedtextarea-line-numbers').show();
+            shown_flag = true;
+            $(this).attr('style', 'color:#15b374;');
+        } else {
+            $('#line-num').hide();
+            $('.numberedtextarea-line-numbers').hide();
+            shown_flag = false;
+            $(this).attr('style', 'color:#999;');
+        }
+    });
+
+    function renderLine() {
+        var line_num = $('#json-target').height() / 20;
+        $('#line-num').html("");
+        var line_num_html = "";
+        for (var i = 1; i < line_num + 1; i++) {
+            line_num_html += "<div>" + i + "<div>";
+        }
+        $('#line-num').html(line_num_html);
+    }
+
+    $('.zip').click(function () {
+        if (zip_flag) {
+            $('#json-src').keyup();
+        } else {
+            //$('#json-target').html(current_json_str.replace(/</g,"&lt;").replace(/>/g,"&gt;"));
+            $('#json-target').html("<xmp>" + current_json_str + "</xmp>");
+            zip_flag = true;
+            $(this).attr('style', 'color:#15b374;');
+        }
+
+    });
+    $('.compress').click(function () {
+        if (!compress_flag) {
+            $(this).attr('style', 'color:#15b374;');
+            //$(this).attr('title','取消折叠').tooltip('fixTitle').tooltip('show');
+            $($(".fa-minus-square-o").toArray().reverse()).click();
+            compress_flag = true;
+        } else {
+            while ($(".fa-plus-square-o").length > 0) {
+                $(".fa-plus-square-o").click();
+            }
+            compress_flag = false;
+            $(this).attr('style', 'color:#555;');
+            $(this).attr('title', '折叠').tooltip('fixTitle').tooltip('show');
+        }
+    });
+    $('.clear').click(function () {
+        $('#json-src').val('');
+        $('#json-target').html('');
+    });
+    $('.share').click(function () {
+        $('#hidden-message-box').hide();
+        $.post("/index.php?is_ajax=1&s=api&app=blog&c=tran&m=add_share",{
+            'type':'jsononline',
+            'content':$('#json-src').val(),
+        }, function (data) {
+            if (data.code==-1) {
+                $('#lggt').click();
+                layer.msg('请先登录再分享');
+            }
+            else if (data.code==0) {
+                layer.msg(data.msg);
+            }
+            else if(data.code==1)
+            {
+                $('#copy_share').html(data.data.sign);
+
+                //询问框
+
+                layer.confirm('<div>'+data.msg+'</div><br/><p style="color: red;">数据将定期清除！</p><br /><div id="copy_share">'+data.data.sign+'</div>'+'<br /><a href="#" class="tip copy_share" title="复制分享" data-clipboard-target="#copy_share" data-placement="bottom"><i\n' +
+                    '                    class="fa fa-copy"></i> 点击复制链接</a>', {
+                    btn: ['关闭'],
+                    title:'复制成功',
+                    success: function(layero, index){
+                        var clipboard_share = new Clipboard('.copy_share');
+                    },
+                });
+            }
+            else
+            {
+                layer.msg('无法分享，未知错误');
+            }
+        }, 'jsonp');
+        /*
+        try {
+            var jqxhr = $.post("/shares/", {"content": current_json_str}, function (data) {
+                var k = data;
+            })
+                .success(function (data) {
+                    // window.location.href = "share.html?k=" + data;
+                })
+                .error(function (data) {
+                    $('#hidden-message-box').hide();
+                    if (data.status <= 400 && data.status > 200) {
+                        $('#hidden-message').html(data.responseText);
+                    } else if (data.status > 400) {
+                        $('#hidden-message').html("服务器升级中...此功能暂不可用.");
+                    }
+                    $('#hidden-message-box').show();
+                }).done(function (data) {
+                    $('#hidden-message-box').hide();
+                    if (data.responseText != undefined) {
+                        $('#hidden-message').html(data.responseText);
+                    } else {
+                        $('#hidden-message').html("服务器升级中...此功能暂不可用.");
+                    }
+                    $('#hidden-message-box').show();
+                }).complete(function (data) {
+                    $('#hidden-message-box').show();
+                });
+        } catch (e) {
+            $('#hidden-message-box').show();
+        } finally {
+            setTimeout(function () {
+                $('#hidden-message-box').hide();
+            }, 3000);
+        }
+        */
+    });
+
+    function getPar(par){
+        //获取当前URL
+        var local_url = document.location.hash.replace('#','');
+        //获取要取得的get参数位置
+        var get = local_url.indexOf(par +"=");
+        if(get == -1){
+            return false;
+        }
+        //截取字符串
+        var get_par = local_url.slice(par.length + get + 1);
+        //判断截取后的字符串是否还有其他get参数
+        var nextPar = get_par.indexOf("&");
+        if(nextPar != -1){
+            get_par = get_par.slice(0, nextPar);
+        }
+        return get_par;
+    }
+
+
+
+
+
+
+    $('.fullScreen').click(function () {
+        $('#dragEle').css('left', '');
+        $('main .col-md-7').css('width', '');
+        $('main .col-md-5').css('width', '');
+        $('.editor-con').toggleClass('editor-full-screen');
+        $('body').toggleClass('overflow-hidden');
+        $('.fullScreen .fa').toggleClass('fa-minus fa-arrows-alt');
+        if ($(this).attr('data-original-title') === '全屏') {
+            $(this).attr('data-original-title', '最小化')
+        } else {
+            $(this).attr('data-original-title', '全屏')
+        }
+    });
+    (function ($) {
+        $.fn.innerText = function (msg) {
+            if (msg) {
+                if (document.body.innerText) {
+                    for (var i in this) {
+                        this[i].innerText = msg;
+                    }
+                } else {
+                    for (var i in this) {
+                        this[i].innerHTML.replace(/&amp;lt;br&amp;gt;/gi, "n").replace(/(&amp;lt;([^&amp;gt;]+)&amp;gt;)/gi, "");
+                    }
+                }
+                return this;
+            } else {
+                if (document.body.innerText) {
+                    return this[0].innerText;
+                } else {
+                    return this[0].innerHTML.replace(/&amp;lt;br&amp;gt;/gi, "n").replace(/(&amp;lt;([^&amp;gt;]+)&amp;gt;)/gi, "");
+                }
+            }
+        };
+    })(jQuery);
+    $('.save').click(function () {
+        // var content = JSON.stringify(current_json);
+        // $('#txt-content').val(content);
+        //var text = "hell world";
+        var html = $('#json-target').html().replace(/\n/g, '<br/>').replace(/\n/g, '<br>');
+        var text = $('#json-target').innerText().replace('　　', '    ');
+        var blob = new Blob([text], {type: "application/json;charset=utf-8"});
+        var timestamp = new Date().getTime();
+        saveAs(blob, "format." + timestamp + ".json");
+    });
+    // $('.copy').click(function () {
+    //     $.msg("成功复制到粘贴板","color:#00D69C;");
+    //     $(this).tooltip('toggle')
+    //           .attr('data-original-title', "复制成功！")
+    //           .tooltip('fixTitle')
+    //           .tooltip('toggle');
+    // });
+    var clipboard = new Clipboard('.copy');
+
+    $('#json-src').keyup();
+
+    //拖拽
+    // var totalWidth = $(window).outerWidth() >= 1200 ? 1200 : $(window).outerWidth();
+    var totalWidth = $(window).outerWidth();
+    // var gapWidth = $(window).outerWidth() > 1200 ? ($(window).outerWidth() - 1200) / 2 : 0;
+    var gapWidth = 0;
+    var forbidenWidth = totalWidth - 400;
+    $('#dragEle').myDrag({
+        parent: 'parent', //定义拖动不能超出的外框,拖动范围
+        randomPosition: false, //初始化随机位置
+        direction: 'x', //方向
+        handler: false, //把手
+        dragStart: function (x, y) {
+            totalWidth = $(window).outerWidth();
+            gapWidth = 0;
+            forbidenWidth = totalWidth - 400;
+        }, //拖动开始 x,y为当前坐标
+        dragEnd: function (x, y) {
+            totalWidth = $(window).outerWidth();
+            gapWidth = 0;
+            forbidenWidth = totalWidth - 400;
+
+            if (x > forbidenWidth) {
+                $('#dragEle').offset({top: 0, left: forbidenWidth - 5 + gapWidth});
+                $('main .col-md-5').width(forbidenWidth);
+                $('main .col-md-7').width(totalWidth - forbidenWidth);
+            } else if (x < 200) {
+                $('#dragEle').offset({top: 0, left: 195 + gapWidth});
+                $('main .col-md-5').width(200);
+                $('main .col-md-7').width(totalWidth - 200);
+            } else {
+                $('main .col-md-5').width(x);
+                $('main .col-md-7').width(totalWidth - x - 1);
+            }
+        }, //拖动停止 x,y为当前坐标
+        dragMove: function (x, y) {
+            if (x > forbidenWidth || x < 200) {
+
+            } else {
+                $('main .col-md-5').width(x);
+                $('main .col-md-7').width(totalWidth - x - 1);
+            }
+        } //拖动进行中 x,y为当前坐标
+    });
+    $(window).resize(function () {
+        $('#dragEle').css('left', '');
+        $('main .col-md-7').css('width', '');
+        $('main .col-md-5').css('width', '');
+    });
+
+    //搜索
+    $('select.chosen-select').on('change', function () {
+
+        window.location.href = $(this).val()
+    });
+    // if ($(window).scrollTop() > 100) {
+    //     $('#goTop').show();
+    // } else {
+    //     $('#goTop').hide();
+    // }
+    //
+    // $(window).scroll(function () {
+    //     if ($(window).scrollTop() > 100) {
+    //         $('#goTop').fadeIn(200);
+    //     } else {
+    //         $('#goTop').fadeOut(200);
+    //     }
+    // });
+    $('body').on('click', '#goTop', function () {
+        $('body,html').animate({
+                scrollTop: 0
+            },
+            500);
+        return false;
+    });
+
+    /*收藏*/
+    $('body').on('click', '.xf-collection', function () {
+        alert('您的浏览器不支持,请按 Ctrl+D 手动收藏!')
+    });
+
+    $('body').on('mouseenter','.ind-footer-nav-item',function () {
+        $('.ind-footer-nav-item').removeClass('active')
+        $(this).addClass('active');
+        var index = $(this).attr('data-index');
+        $('.ind-footer-nav-show').each(function (i, v) {
+            if ($(this).attr('data-index') == index){
+                $(this).addClass('active')
+            }else {
+                $(this).removeClass('active');
+            }
+        });
+    });
+
+
+    $('body').on('mouseenter','.nav-show-one',function () {
+        $('.nav-show-one').removeClass('active');
+        $(this).addClass('active');
+        var itext = $(this).text();
+        var ione = $(this).attr('data-chose');
+        $(this).closest('.ind-footer-nav-show').find('.nav-show-one-sm-s-show').each(function (i, v) {
+            $(v).hide();
+            var index =  $(v).attr('data-target');
+            if (ione == index){
+                $(v).find('.nav-show-one-sm-show-t').text(itext)
+                $(v).show();
+            }
+        });
+    });
+</script>
+</body>
+</html>
